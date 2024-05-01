@@ -10,8 +10,9 @@ const registerUser = async (req, res,next) => {
         errorMessage: "Bad request",
       });
     }
+    let formattedEmail = email.toLowerCase();
 
-    const isExistingUser = await User.findOne({ email: email });
+    const isExistingUser = await User.findOne({ email: formattedEmail });
     if (isExistingUser) {
       return res.status(409).json({ errorMessage: "User already exist" });
     }
@@ -20,7 +21,7 @@ const registerUser = async (req, res,next) => {
 
     const userData = new User({
       name,
-      email,
+      email: formattedEmail,
       password: hashedPassword,
       mobile,
     });
@@ -65,6 +66,7 @@ const loginUser = async (req, res,next) => {
     res.json({
       message: "User logged in",
       token: token,
+      useId: userDetails._id,
       name: userDetails.name,
     });
   } catch (error) {
