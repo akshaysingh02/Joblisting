@@ -79,8 +79,9 @@ const getJobDetailsById = async (req, res, next) => {
 
 const updateJobDetailsById = async (req, res, next) => {
   try {
-    const jobId = req.params.jobid;
-
+    const jobId = req.params.jobId;
+    const userId = req.params.userId
+    console.log(userId)
     const {
       companyName,
       logoUrl,
@@ -120,6 +121,7 @@ const updateJobDetailsById = async (req, res, next) => {
     }
 
     const isJobExist = await Job.findOne({ _id: jobId });
+    //check if refUserId == parameter id
     if (!isJobExist) {
       return res.status(400).json({
         errorMessage: "Bad request",
