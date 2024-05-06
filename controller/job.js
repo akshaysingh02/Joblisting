@@ -58,20 +58,25 @@ const createJobPost = async (req, res, next) => {
 
 const getJobDetailsById = async (req, res, next) => {
   try {
-    const { jobid } = req.params;
-    if (!jobid) {
+    const { jobId,userId } = req.params;
+    if (!jobId) {
       return res.status(400).json({
         errorMessage: "Bad request",
       });
     }
-    const jobDetails = await Job.findById(jobid);
+    const jobDetails = await Job.findById(jobId);
     if (!jobDetails) {
       return res.status(400).json({
         errorMessage: "Bad request",
       });
     }
 
-    res.json({ jobDetails });
+    let isEditable = false;
+    if(jobDetails.refUserId.toString() === userId){
+      isEditable = true;
+    }
+
+    res.json({ jobDetails, isEditable: isEditable });
   } catch (error) {
     next(error);
   }
@@ -80,8 +85,6 @@ const getJobDetailsById = async (req, res, next) => {
 const updateJobDetailsById = async (req, res, next) => {
   try {
     const jobId = req.params.jobId;
-    const userId = req.params.userId
-    console.log(userId)
     const {
       companyName,
       logoUrl,
