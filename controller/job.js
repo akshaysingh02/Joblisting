@@ -58,7 +58,7 @@ const createJobPost = async (req, res, next) => {
 
 const getJobDetailsById = async (req, res, next) => {
   try {
-    const { jobId,userId } = req.params;
+    const { jobId, userId } = req.params;
     if (!jobId) {
       return res.status(400).json({
         errorMessage: "Bad request",
@@ -72,8 +72,10 @@ const getJobDetailsById = async (req, res, next) => {
     }
 
     let isEditable = false;
-    if(jobDetails.refUserId.toString() === userId){
-      isEditable = true;
+    if(!!jobDetails.refUserId){
+      if (jobDetails?.refUserId?.toString() === userId) {
+        isEditable = true;
+      }
     }
 
     res.json({ jobDetails, isEditable: isEditable });
@@ -158,22 +160,30 @@ const updateJobDetailsById = async (req, res, next) => {
 const getAllJobs = async (req, res, next) => {
   try {
     const searchQuery = req.query.searchQuery || "";
+    const activeUserId = req.params.userId || "";
     const skills = req.query.skills;
     let filteredSkills;
-    let filter = {}
+    let filter = {};
     if (skills && skills.length > 0) {
       filteredSkills = skills.split(",");
       const caseInsensitiveFilteredSkills = filteredSkills.map(
         (element) => new RegExp(element, "i")
       );
       filteredSkills = caseInsensitiveFilteredSkills;
-      filter = {skills: {$in: filteredSkills}};
+      filter = { skills: { $in: filteredSkills } };
     }
 
     const jobList = await Job.find(
       { title: { $regex: searchQuery, $options: "i" }, ...filter },
-      { companyName: 1, title: 1, description: 1 }
     );
+
+    // const updatedJobList = jobList.map((data)=> {
+    //   if(data.refUserId.toString() === activeUserId){
+    //     return {...data, isEditable: true}
+    //   }else{
+    //     return {...data};
+    //   }
+    // })
 
     res.json({ data: jobList });
   } catch (error) {
